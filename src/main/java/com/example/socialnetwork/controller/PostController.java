@@ -15,13 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 public class PostController {
     private final PostService postService;
-    public PostController(PostService postService){
+
+    public PostController(PostService postService) {
         this.postService = postService;
     }
+
     @PostMapping
     public ResponseEntity<PostDTO> createPost(
             @RequestBody PostDTO postDTO
-    ){
+    ) {
         return new ResponseEntity<>(
                 postService.createPost(postDTO),
                 HttpStatus.CREATED
