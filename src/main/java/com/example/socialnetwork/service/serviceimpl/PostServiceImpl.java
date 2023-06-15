@@ -1,6 +1,7 @@
 package com.example.socialnetwork.service.serviceimpl;
 
 import com.example.socialnetwork.dto.PostDTO;
+import com.example.socialnetwork.exception.ResourceNotFoundException;
 import com.example.socialnetwork.model.Post;
 import com.example.socialnetwork.repository.PostRepository;
 import com.example.socialnetwork.service.PostService;
@@ -12,20 +13,24 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class PostDTOImpl implements PostService {
+public class PostServiceImpl implements PostService {
     private PostRepository postRepository;
     @Autowired
-    PostDTOImpl(PostRepository postRepository) {
+    PostServiceImpl(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
 
     @Override
-    public PostDTO createPost(PostDTO postDTO) {
-        var post = mapToModelPost(postDTO);
-        Post newPost = postRepository.save(post);
+    public PostDTO createPost(PostDTO postDto) {
 
-        PostDTO postResp = mapToDto(newPost);
-        return postResp;
+        // convert DTO to entity
+        Post post = mapToModel(postDto);
+        Post newPost = post;
+        postRepository.save(post);
+
+        // convert entity to DTO
+        PostDTO postResponse = mapToDTO(newPost);
+        return postResponse;
     }
 
     @Override
@@ -33,7 +38,7 @@ public class PostDTOImpl implements PostService {
         List<PostDTO> postDtos = postRepository
                 .findAll()
                 .stream()
-                .map(this::mapToDto)
+                .map(this::mapToDTO)
                 .collect(Collectors.toList());
 
         return postDtos;
@@ -41,29 +46,45 @@ public class PostDTOImpl implements PostService {
 
     @Override
     public PostDTO getPostById(Long id) {
+        System.out.println("getPostById");
         return postRepository
                 .findAll()
                 .stream()
-                .filter(post -> Objects.equals(post.getId(), id))
+                .filter(post -> post.getId() == id)
                 .findFirst()
-                .map(post -> mapToDto(post))
+                .map(this::mapToDTO)
                 .orElse(new PostDTO());
     }
 
-    private PostDTO mapToDto(Post post){
+    @Override
+    public PostDTO updatePost(PostDTO postDTO, Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id.toString()));
+        if(post == null) {
+            new IllegalArgumentException("User not found " + id);
+        }
+        post.setId(postDTO.getId());
+        post.setTitle(post.getTitle());
+        post.setContent(post.getContent());
+        post.setDescription(postDTO.getDescription());
+        return mapToDTO(postRepository.save(post));
+    }
+
+    private PostDTO mapToDTO(Post post){
         var postDto = new PostDTO();
-        postDto.setId(post.getId());
+//        postDto.setId(post.getId());
         postDto.setTitle(post.getTitle());
         postDto.setDescription(post.getDescription());
         postDto.setContent(post.getContent());
         return postDto;
     }
 
-    private Post mapToModelPost(PostDTO postDTO){
+    private Post mapToModel(PostDTO postDTO){
         Post post = new Post();
+//        post.setId(postDTO.getId());
         post.setTitle(postDTO.getTitle());
         post.setDescription(postDTO.getDescription());
-        post.setContent(post.getContent());
+        post.setContent(postDTO.getContent());
         return post;
     }
 }

@@ -4,10 +4,9 @@ import com.example.socialnetwork.dto.PostDTO;
 import com.example.socialnetwork.service.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -28,5 +27,30 @@ public class PostController {
                 postService.createPost(postDTO),
                 HttpStatus.CREATED
         );
+    }
+
+    @GetMapping("{postId}/post")
+    public ResponseEntity<PostDTO> getPost(@PathVariable("postId") Long id) {
+        System.out.println(id);
+        return new ResponseEntity<>(
+                postService.getPostById(id),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<List<PostDTO>> getPosts() {
+        System.out.println();
+        return new ResponseEntity<>(
+                postService.getPosts(),
+                HttpStatus.OK
+        );
+    }
+
+    @PutMapping("{id}/update")
+    public ResponseEntity<PostDTO> updatePost(@PathVariable(name = "id") Long id,
+                                              @RequestBody PostDTO postDTO) {
+        PostDTO postResp = postService.updatePost(postDTO, id);
+        return new ResponseEntity<>(postResp, HttpStatus.OK);
     }
 }

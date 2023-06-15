@@ -8,19 +8,19 @@ import lombok.NoArgsConstructor;
 
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-
-@Entity(name = "posts")
+@NoArgsConstructor
+@Entity
+@Table(
+        name = "posts", uniqueConstraints = {@UniqueConstraint(columnNames = {"title"})}
+)
 public class Post {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(unique = true, nullable = false)
-    private String title;
-    @Column(nullable = false)
-    private String description;
-    @Column(nullable = false)
-    private String content;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @Column(name = "title", nullable = false)
+    private String title;
+    private String description;
+    private String content;
 }
